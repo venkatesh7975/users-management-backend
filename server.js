@@ -1,5 +1,3 @@
-// server.js
-
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -42,10 +40,10 @@ mongoose
 // Endpoint to handle adding a new username (POST request)
 app.post("/", async (req, res) => {
   try {
-    const { username } = req.body; // Extracting username from request body
+    const { username } = req.body;
     const newUser = new User({ username });
-    await newUser.save(); // Saving username to MongoDB
-    res.status(201).json({ message: "Username added successfully" });
+    await newUser.save();
+    res.status(201).json(newUser); // Return the newly created user
   } catch (error) {
     console.error("Error adding username:", error.message);
     res.status(500).json({ error: "Failed to add username" });
@@ -55,11 +53,40 @@ app.post("/", async (req, res) => {
 // Endpoint to handle fetching all usernames (GET request)
 app.get("/", async (req, res) => {
   try {
-    const users = await User.find(); // Fetching all usernames from MongoDB
+    const users = await User.find();
     res.json(users);
   } catch (error) {
     console.error("Error fetching usernames:", error.message);
     res.status(500).json({ error: "Failed to fetch usernames" });
+  }
+});
+
+// Endpoint to handle updating a username (PUT request)
+app.put("/:id", async (req, res) => {
+  const { id } = req.params;
+  const { username } = req.body;
+  try {
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      { username },
+      { new: true } // To return the updated document
+    );
+    res.json(updatedUser);
+  } catch (error) {
+    console.error("Error updating username:", error.message);
+    res.status(500).json({ error: "Failed to update username" });
+  }
+});
+
+// Endpoint to handle deleting a username (DELETE request)
+app.delete("/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    await User.findByIdAndDelete(id);
+    res.json({ message: "User deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting username:", error.message);
+    res.status(500).json({ error: "Failed to delete username" });
   }
 });
 
